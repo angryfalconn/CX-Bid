@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f2">
+  <meta name="description" content="A practical courier quote calculator for estimating a profitable delivery bid.">
+  <title>RouteRate — Courier quote calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="#top"><span class="brand-mark">R</span> RouteRate</a><span class="local-note"><i></i> Your figures stay in this browser</span></header>
+  <main id="top">
+    <section class="intro"><div class="intro-copy"><p class="eyebrow">A CLEARER WAY TO QUOTE</p><h1>Know your costs.<br><em>Bid with confidence.</em></h1><p>Map the round trip, compare the prices you can see, and get a suggested bid that accounts for your costs and target margin.</p></div><div class="van-showcase" aria-label="RouteRate branded courier van"><div class="van-road"><span></span><span></span><span></span></div><svg class="sprinter-van" viewBox="0 0 260 130" role="img" aria-label="RouteRate long-wheelbase courier van"><ellipse cx="130" cy="112" rx="104" ry="8" fill="#163d2c" opacity=".14"/><g class="van-body"><path d="M28 36q0-8 9-8h135q10 0 16 8l28 32q6 7 6 17v12q0 7-8 7h-9a18 18 0 0 0-36 0H89a18 18 0 0 0-36 0H33q-8 0-8-8V43q0-7 3-7Z" fill="#245b43"/><path d="M178 36h-27v31h56l-23-27q-2-4-6-4Z" fill="#dbe9db"/><path d="M31 39q0-5 6-5h18v33H31V39Z" fill="#dbe9db"/><path d="M25 79h194v17q0 6-7 6h-7a18 18 0 0 0-36 0H89a18 18 0 0 0-36 0h-1V82q0-6 10-6Z" fill="#f2f4e9"/><path d="M62 76h94v28H89a18 18 0 0 0-36 0h-1V82q0-6 10-6Z" fill="#245b43"/><text x="68" y="89" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="700">RouteRate</text><text x="69" y="99" fill="#d6e8d8" font-family="Arial,sans-serif" font-size="5.5" font-weight="700" letter-spacing="1.3">COURIER &middot; UK</text><path d="M215 76h7v10h-7z" fill="#f4d77a"/><path d="M26 75h5v9h-5z" fill="#e77754"/><g class="van-wheel"><circle cx="71" cy="101" r="12" fill="#1b2821"/><circle cx="71" cy="101" r="5" fill="#c8d1c8"/><circle cx="190" cy="101" r="12" fill="#1b2821"/><circle cx="190" cy="101" r="5" fill="#c8d1c8"/></g></g></svg><small class="van-caption">YOUR ROUTE. YOUR RATE.</small></div></section>
+    <section class="route-planner" aria-label="Route planner">
+      <div class="route-head"><div><p class="eyebrow">ROUTE PLANNER</p><h2>Map the full run</h2><p>Enter the first part of each postcode (such as M1 or SW1A) or a full postcode. We’ll route from your base to collection, delivery, and back.</p></div><span class="route-icon">⌖</span></div>
+      <div class="route-content"><div class="route-inputs">
+        <label class="field">Your starting postcode<input id="startPostcode" autocomplete="postal-code" placeholder="e.g. M1" value="M1"></label>
+        <label class="field">Collection postcode<input id="pickupPostcode" autocomplete="postal-code" placeholder="e.g. B1"></label>
+        <label class="field">Delivery postcode<input id="deliveryPostcode" autocomplete="postal-code" placeholder="e.g. LS1"></label>
+        <button id="routeButton" class="route-button" type="button"><span>Calculate route &amp; miles</span><b>↗</b></button>
+        <p id="routeStatus" class="route-status" role="status">Enter the collection and delivery postcodes, then calculate.</p>
+        <div class="leg-summary" id="legSummary"><div><span>Empty to collection</span><span class="leg-values"><strong id="emptyLeg">—</strong><small id="emptyTime">— drive</small></span></div><div><span>Loaded delivery</span><span class="leg-values"><strong id="loadedLeg">—</strong><small id="loadedTime">— drive</small></span></div><div><span>Return to base</span><span class="leg-values"><strong id="returnLeg">—</strong><small id="returnTime">— drive</small></span></div><div class="leg-total"><span>Full round trip</span><span class="leg-values"><strong id="roundTripMiles">—</strong><small id="roundTripTime">— total driving</small></span></div></div>
+        <div class="eta-panel" aria-live="polite"><div class="eta-live"><span>LIVE UK TIME</span><strong id="liveClock">--:--:--</strong></div><label class="departure-control" for="plannedDeparture"><span>Planned departure <small>Adjust to update arrival estimates</small></span><input id="plannedDeparture" type="datetime-local" aria-label="Planned departure date and time"></label><div class="eta-row"><span>Reach collection <small id="collectionEtaDetail">After base to collection drive</small></span><strong id="collectionEta">--:--</strong></div><div class="eta-row"><span>Reach delivery <small id="deliveryEtaDetail">After collection and loaded drive</small></span><strong id="deliveryEta">--:--</strong></div><div class="mileage-progress"><span>BASE TO COLLECTION</span><strong id="milesToCollection">-- mi</strong><span>BASE TO DELIVERY</span><strong id="milesToDelivery">-- mi</strong></div><p>Arrival times use your planned departure and estimated drive durations. Add loading or stop delays in the wait time setting.</p></div>
+      </div><div class="map-wrap"><div id="routeMap" aria-label="Map showing your delivery route"></div><div class="map-notice" id="mapNotice" role="status" hidden></div><span class="map-caption">ROUTE PREVIEW · ESTIMATED ROAD DISTANCE</span></div></div>
+      <p class="route-disclaimer">First postcode parts are routed to the postcode area’s approximate centre; full postcodes give a more precise estimate. Lookups use online services and routes use OpenStreetMap data. Verify distances with your navigation app.</p>
+    </section>
+    <section class="calculator" aria-label="Courier quote calculator">
+      <div class="form-panel">
+        <div class="panel-title"><div><p class="eyebrow">01 / JOB DETAILS</p><h2>Build your quote</h2></div><span class="step-icon">↗</span></div>
+        <form id="quoteForm">
+        <div class="field-grid route-fields"><label class="field full">Job / reference <span class="optional">Optional</span><input id="jobRef" type="text" placeholder="e.g. DX-2048 or urgent pallet"></label></div>
+          <input id="loadedMiles" type="hidden" value="0"><input id="emptyMiles" type="hidden" value="0"><input id="returnMiles" type="hidden" value="0">
+          <div class="divider"><span>YOUR RUNNING COSTS</span></div>
+          <div class="field-grid">
+            <label class="field">Fuel efficiency <span class="unit">mpg</span><input id="mpg" type="number" min="1" step="0.1" value="32" required></label>
+            <label class="field">Fuel price <span class="unit">£ / litre</span><input id="fuelPrice" type="number" min="0" step="0.01" value="1.48" required></label>
+            <label class="field">Vehicle &amp; upkeep <span class="unit">£ / mile</span><input id="vehicleCost" type="number" min="0" step="0.01" value="0.18" required></label>
+            <label class="field">Other costs <span class="unit">£</span><input id="otherCosts" type="number" min="0" step="0.01" value="0" required><small>Tolls, parking, ferry, etc.</small></label>
+            <label class="field">Waiting / loading time <span class="unit">hours</span><input id="waitHours" type="number" min="0" step="0.25" value="0" required></label>
+            <label class="field">Your time rate <span class="unit">£ / hour</span><input id="hourlyRate" type="number" min="0" step="1" value="18" required></label>
+          </div>
+          <div class="divider"><span>MONTHLY TARGETS &amp; INSURANCE</span></div>
+          <div class="field-grid goal-fields">
+            <label class="field">Monthly insurance <span class="unit">£</span><input id="insuranceMonthly" type="number" min="0" step="1" value="400"><small>Your premium, split over target jobs.</small></label>
+            <label class="field">Average payout per job <span class="unit">£</span><input id="averagePayout" type="number" min="1" step="1" value="125"><small>Change this to match your typical job.</small></label>
+            <label class="field">Monthly turnover target <span class="unit">£</span><input id="monthlyTarget" type="number" min="0" step="100" value="6000"></label>
+            <label class="field">Daily turnover target <span class="unit">£</span><input id="dailyTarget" type="number" min="0" step="10" value="250"></label>
+            <label class="field">Working days per month <span class="unit">days</span><input id="workingDays" type="number" min="1" max="31" step="1" value="24"></label>
+            <label class="field">Hours per working day <span class="unit">hours</span><input id="hoursPerDay" type="number" min="1" max="24" step="0.5" value="9.5"></label>
+          </div>
+          <div class="divider"><span>BID SETTINGS</span></div>
+          <div class="field-grid bid-fields">
+            <label class="field">Target profit margin <span class="unit">%</span><input id="margin" type="number" min="0" max="90" step="1" value="20" required><small>Applied to costs plus your time.</small></label>
+            <label class="field">Round bid up to <span class="unit">£</span><select id="roundTo"><option value="1">£1 steps</option><option value="5" selected>£5 steps</option><option value="10">£10 steps</option><option value="0.01">No rounding</option></select></label>
+          </div>
+          <div class="divider"><span>MARKET CHECK · ENTER WHAT YOU CAN SEE</span></div>
+          <div class="field-grid market-fields">
+            <label class="field">Typical market price <span class="unit">£</span><input id="marketPrice" type="number" min="0" step="1" placeholder="Optional"><small>From comparable work or the listing.</small></label>
+            <label class="field">Other bids <span class="unit">£ each</span><input id="otherBids" type="text" inputmode="decimal" placeholder="e.g. 180, 195, 220"><small>Enter visible bids, separated by commas.</small></label>
+          </div>
+          <label class="check-field"><input id="useMarket" type="checkbox" checked><span>Use market figures to shape a competitive bid, while protecting my target margin.</span></label>
+        </form>
+        <p class="privacy-note"><span>↳</span> Quotes update as you type and are saved on this device.</p>
+      </div>
+      <aside class="result-panel" aria-live="polite">
+        <div class="result-top"><p class="eyebrow">YOUR SUGGESTED BID</p><span class="live-pill"><i></i> LIVE ESTIMATE</span></div>
+        <div class="price-line"><span class="currency">£</span><output id="suggestedBid">—</output></div>
+        <p class="result-caption">Price includes the drive back to base <span id="roundedLabel">rounded up to nearest £5</span></p>
+        <div class="alternate-bid"><div><small>WITHOUT RETURN TO BASE</small><strong>£<output id="bidToDelivery">—</output></strong><p>Priced only to the delivery point</p></div><button class="copy-alt" id="copyQuoteNoReturn" type="button" aria-label="Copy bid excluding return to base">Copy this bid ↗</button></div>
+        <div class="profit-card"><div class="profit-icon">↗</div><div><small>ESTIMATED PROFIT</small><strong id="estimatedProfit">—</strong></div><span class="profit-margin" id="marginLabel">20% margin</span></div>
+        <div class="target-card"><div class="target-heading"><span>YOUR DAILY TARGET PLAN</span><span id="targetPace">ON PACE</span></div><div class="target-grid"><div><small>Daily turnover</small><strong id="dailyTargetView">—</strong></div><div><small>Monthly goal</small><strong id="monthlyTargetView">—</strong></div><div><small>Jobs needed / day</small><strong id="jobsPerDayView">—</strong></div><div><small>Turnover / hour</small><strong id="hourlyTargetView">—</strong></div></div><p id="targetSummary">—</p></div>
+        <div class="market-card"><div class="market-heading"><span>MARKET COMPARISON</span><span id="marketBadge">ADD MARKET DATA</span></div><div class="market-stats"><div><small>Lowest visible</small><strong id="marketLow">—</strong></div><div><small>Average bid</small><strong id="marketAverage">—</strong></div><div><small>Your bid vs average</small><strong id="marketPosition">—</strong></div></div><p id="marketAdvice">Add comparable prices or visible bids to see where your quote sits.</p></div>
+        <div class="breakdown"><div class="breakdown-title"><span>COST BREAKDOWN</span><span id="totalMiles">&mdash; total miles</span></div>
+          <section class="cost-group"><h3>To delivery - no return leg</h3><div class="break-row"><span>Fuel <small id="fuelToDeliveryDetail">&mdash;</small></span><strong id="fuelToDeliveryTotal">&mdash;</strong></div><div class="break-row"><span>Vehicle &amp; upkeep</span><strong id="vehicleToDeliveryTotal">&mdash;</strong></div><div class="break-row"><span>Driving time &amp; wait <small id="timeToDeliveryDetail">&mdash;</small></span><strong id="timeToDeliveryTotal">&mdash;</strong></div><div class="break-row"><span>Insurance &amp; other costs</span><strong id="fixedToDeliveryTotal">&mdash;</strong></div><div class="break-row subtotal"><span>Cost to delivery</span><strong id="costToDelivery">&mdash;</strong></div></section>
+          <section class="cost-group"><h3>Return to base</h3><div class="break-row"><span>Fuel <small id="fuelReturnDetail">&mdash;</small></span><strong id="fuelReturnTotal">&mdash;</strong></div><div class="break-row"><span>Vehicle &amp; upkeep</span><strong id="vehicleReturnTotal">&mdash;</strong></div><div class="break-row"><span>Driving time <small id="timeReturnDetail">&mdash;</small></span><strong id="timeReturnTotal">&mdash;</strong></div><div class="break-row subtotal"><span>Return leg cost</span><strong id="costReturn">&mdash;</strong></div></section>
+          <div class="break-row subtotal full-cost"><span>Full round-trip cost base</span><strong id="costBase">&mdash;</strong></div><div class="break-row"><span>Target profit (round trip)</span><strong id="profitTotal">&mdash;</strong></div></div>
+        <button class="copy-button" id="copyQuote" type="button"><span>Copy bid message</span><b>↗</b></button>
+        <p class="result-footnote">Market prices and bids must be entered from the listing. Route and quote are estimates; confirm job details, access, timing, VAT and payment terms before bidding.</p>
+      </aside>
+    </section>
+    <section class="how"><div><span class="how-number">01</span><strong>Enter the whole route</strong><p>Include your empty run to collection as well as the loaded miles.</p></div><div><span class="how-number">02</span><strong>Use your real costs</strong><p>Set fuel, upkeep and time rates to match your vehicle and business.</p></div><div><span class="how-number">03</span><strong>Copy and review</strong><p>Use the suggested amount as a guide, then check it against the job.</p></div></section>
+  </main>
+  <footer><span>RouteRate <b>·</b> Made for independent drivers</span><span>Does not connect to or submit bids on any exchange.</span></footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
